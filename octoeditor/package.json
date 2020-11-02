@@ -26,5 +26,9 @@
   },
   "jest": {
     "preset": "react-native"
+  },
+  "resolutions": {
+    "//": "Avoids sourcemap missing bug in cli-debugger-ui v4.9.0",
+    "@react-native-community/cli-debugger-ui": "file:overrides/cli-debugger-ui"
   }
 }
