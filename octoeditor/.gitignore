@@ -59,5 +59,5 @@ buck-out/
 /ios/Pods/
 
 # Visual Studio
-Deploy.binlog
-msbuild.binlog
+*/Deploy.binlog
+*/msbuild.binlog
