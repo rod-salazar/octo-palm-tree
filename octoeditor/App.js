@@ -1,6 +1,4 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
  *
  * @format
  * @flow strict-local
@@ -8,107 +6,70 @@
 
 import React from 'react';
 import {
-  SafeAreaView,
+  Dimensions,
   StyleSheet,
-  ScrollView,
   View,
   Text,
-  StatusBar,
 } from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
 const App: () => React$Node = () => {
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <View>
+     <DefaultPanes />
+    </View>
   );
 };
 
+const HEIGHT = Dimensions.get('window').height;
+
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  Divider: {
+    backgroundColor: '#000000',
+    height: HEIGHT,
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  Panel: {
+    backgroundColor: '#303030',
+    height: HEIGHT,
   },
 });
+
+// For now 1 row, but we should extend to any nested mix with many rows.
+// Sizes here dont matter, just some default pane.
+const DIVIDER_WIDTH = 2;
+const WIDTH = Dimensions.get('window').width;
+const THIRD = WIDTH / 3;
+const PANES = [
+  {type: 'pane', width: THIRD, style: styles.Panel},
+  {type: 'pane', width: WIDTH - THIRD, style: styles.Panel}
+];
+
+// The purpose of this is to figure out how to nice
+// resize individual panes (and perhaps style them).
+const DefaultPanes: () => React$Node = () => {
+  const divider = {type: 'divider', style: styles.Divider, width: DIVIDER_WIDTH}; // const
+
+  const items = []
+  for (let i=0;i<PANES.length;i+=1) {
+    items.push(PANES[i]);
+    if (i + 1 != PANES.length) {
+      items[items.length - 1].width -= DIVIDER_WIDTH;
+      items.push(divider);
+    }
+  }
+
+  // remove
+  console.log(items);
+
+  return (
+    <View style={{flex: 1, flexDirection: 'row',}}>
+      {items.map((item, i) => {
+        return (
+          <View key={i} style={{...item.style, width: item.width}}>
+          </View>
+        );
+      })}
+    </View>
+  );
+};
 
 export default App;
