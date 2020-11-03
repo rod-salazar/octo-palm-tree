@@ -1,8 +1,9 @@
 /**
- *
  * @format
  * @flow strict-local
  */
+
+import test from '@app/show';
 
 import React from 'react';
 import {

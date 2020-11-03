@@ -17,6 +17,7 @@ module.exports = {
       // This prevents "react-native run-windows" from hitting: EBUSY: resource busy or locked, open msbuild.ProjectImports.zip
       /.*\.ProjectImports\.zip/,
     ]),
+
   },
   transformer: {
     getTransformOptions: async () => ({
