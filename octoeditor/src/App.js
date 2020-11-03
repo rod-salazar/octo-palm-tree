@@ -3,7 +3,7 @@
  * @flow strict-local
  */
 
-import test from '@app/show';
+'use strict'
 
 import React from 'react';
 import {
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 
 // For now 1 row, but we should extend to any nested mix with many rows.
 // Sizes here dont matter, just some default pane.
-const DIVIDER_WIDTH = 2;
+const DIVIDER_WIDTH: number = 2;
 const WIDTH = Dimensions.get('window').width;
 const THIRD = WIDTH / 3;
 const PANES = [
