@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
 
 // For now 1 row, but we should extend to any nested mix with many rows.
 // Sizes here dont matter, just some default pane.
-const DIVIDER_WIDTH: number = 2;
+const DIVIDER_WIDTH: number = 4;
 const WIDTH = Dimensions.get('window').width;
 const THIRD = WIDTH / 3;
 const PANES = [
@@ -48,11 +48,17 @@ const PANES = [
 // The purpose of this is to figure out how to nice
 // resize individual panes (and perhaps style them).
 const DefaultPanes: () => React$Node = () => {
-  const divider = {type: 'divider', style: styles.Divider, width: DIVIDER_WIDTH, onMouseEnter: () => {
-    NativeModules.Cursor.SetCursorTo("resize");
-  }, onMouseLeave: () => {
-    NativeModules.Cursor.SetCursorTo("arrow");
-  }}; // const
+  const divider = {
+    type: 'divider',
+    style: styles.Divider,
+    width: DIVIDER_WIDTH,
+    onMouseEnter: () => {
+      NativeModules.Cursor.SetCursorTo("resize");
+    },
+    onMouseLeave: () => {
+      NativeModules.Cursor.SetCursorTo("arrow");
+    }
+  }; // make global const or something
 
   const items = []
   for (let i=0;i<PANES.length;i+=1) {
