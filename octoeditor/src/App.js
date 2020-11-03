@@ -9,6 +9,7 @@ import React from 'react';
 import {
   Dimensions,
   StyleSheet,
+  NativeModules,
   View,
   Text,
 } from 'react-native';
@@ -47,7 +48,11 @@ const PANES = [
 // The purpose of this is to figure out how to nice
 // resize individual panes (and perhaps style them).
 const DefaultPanes: () => React$Node = () => {
-  const divider = {type: 'divider', style: styles.Divider, width: DIVIDER_WIDTH}; // const
+  const divider = {type: 'divider', style: styles.Divider, width: DIVIDER_WIDTH, onMouseEnter: () => {
+    NativeModules.Cursor.SetCursorTo("resize");
+  }, onMouseLeave: () => {
+    NativeModules.Cursor.SetCursorTo("arrow");
+  }}; // const
 
   const items = []
   for (let i=0;i<PANES.length;i+=1) {
@@ -58,14 +63,15 @@ const DefaultPanes: () => React$Node = () => {
     }
   }
 
-  // remove
-  console.log(items);
-
   return (
     <View style={{flex: 1, flexDirection: 'row',}}>
       {items.map((item, i) => {
         return (
-          <View key={i} style={{...item.style, width: item.width}}>
+          <View
+            key={i}
+            style={{...item.style, width: item.width}}
+            onMouseEnter={item.onMouseEnter}
+            onMouseLeave={item.onMouseLeave}>
           </View>
         );
       })}

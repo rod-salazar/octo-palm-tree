@@ -2,6 +2,7 @@
 
 #include "winrt/Microsoft.ReactNative.h"
 
+#include "CursorNativeModule.h"
 
 namespace winrt::octoeditor::implementation
 {
