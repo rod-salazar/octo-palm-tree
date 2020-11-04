@@ -15,17 +15,11 @@ import {
   Text,
 } from 'react-native';
 
-const App: () => React$Node = () => {
-  return (
-    <View>
-     <DefaultPanes />
-    </View>
-  );
-};
+import type {DimensionValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 
 const HEIGHT = Dimensions.get('window').height;
 
-const styles = StyleSheet.create({
+const styles: {[string]: IStyle} = StyleSheet.create({
   Divider: {
     backgroundColor: '#000000',
     height: HEIGHT,
@@ -42,18 +36,64 @@ const WIDTH = Dimensions.get('window').width;
 
 // Sizes here do not matter, it's just a starting state.
 const THIRD = WIDTH / 3;
-const INITIAL_PANES = [
-  {type: 'pane', width: THIRD, style: styles.Panel, onMouseEnter: null, onMouseLeave: null},
-  {type: 'pane', width: THIRD, style: styles.Panel, onMouseEnter: null, onMouseLeave: null},
-  {type: 'pane', width: THIRD, style: styles.Panel, onMouseEnter: null, onMouseLeave: null},
+const INITIAL_ROWS = [
+  {
+    panes: [
+      {type: 'pane', width: THIRD, style: styles.Panel, onMouseEnter: () => {}, onMouseLeave: () => {}},
+      {type: 'pane', width: THIRD, style: styles.Panel, onMouseEnter: () => {}, onMouseLeave: () => {}},
+      {type: 'pane', width: THIRD, style: styles.Panel, onMouseEnter: () => {}, onMouseLeave: () => {}},
+    ],
+    height: HEIGHT - (HEIGHT / 3),
+  },
+  {
+    panes: [
+      {type: 'pane', width: WIDTH, style: styles.Panel, onMouseEnter: () => {}, onMouseLeave: () => {}},
+    ],
+    height: HEIGHT / 3,
+  },
 ];
 
-const DefaultPanes: () => React$Node = () => {
-  const [panes, setPanes] = useState(INITIAL_PANES);
+function setResizeCursor() {
+  NativeModules.Cursor.SetCursorTo("resize");
+}
+
+function setDefaultCursor() {
+  NativeModules.Cursor.SetCursorTo("arrow");
+}
+
+const App: () => React$Node = () => {
+  return (
+    <View>
+     <Panes initial_panes={INITIAL_ROWS[0].panes} vertical={false} />
+    </View>
+  );
+};
+
+type IStyle = {|
+  height?: DimensionValue;
+  width?: DimensionValue;
+  backgroundColor?: string;
+|}
+
+type Pane = {|
+  type: string;
+  width: number;
+  style: IStyle;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+|}
+
+interface PanesProps {
+  initial_panes: Array<Pane>;
+  vertical: boolean;
+}
+
+const Panes: (PanesProps) => React$Node = (props: PanesProps) => {
+  const [panes, setPanes] = useState(props.initial_panes);
 
   // The dx of the divider index (if there is 1 divider, the index is 0).
   // We keep an object of dx so that we can index by pane index (pane index)
-  // refers to the index of the divider that is in front of it, and substracting
+  // to refer to the index of the divider that is in front of it, and substracting
   // 1 from pane index gives you the divider index that is to the left of the pane.
   const [dxDiffs, setDxDiffs] = useState({});
 
@@ -71,10 +111,7 @@ const DefaultPanes: () => React$Node = () => {
       const responder = PanResponder.create({
         onMoveShouldSetPanResponder: () => true,
         onPanResponderMove: (event, gesture) => {
-          setDxDiffs(dxRef => {
-            // Set the dx value to the divider index.
-            return {...dxRef, [dividerIndex]: gesture.dx};
-          });
+          setDxDiffs({[dividerIndex]: gesture.dx});
         },
         onPanResponderRelease: (evt, gestureState) => {
           // Save the pane size update
@@ -101,46 +138,38 @@ const DefaultPanes: () => React$Node = () => {
     return ret;
   }, [panes]);
 
-  const createDivider = (dividerIndex: number) => ({
-    type: 'divider',
-    style: styles.Divider,
-    width: DIVIDER_WIDTH,
-    onMouseEnter: () => {
-      NativeModules.Cursor.SetCursorTo("resize");
-    },
-    onMouseLeave: () => {
-      NativeModules.Cursor.SetCursorTo("arrow");
-    },
-    panHandlers: panResponders[dividerIndex].panHandlers,
-  });
-
   const items = [];
-  for (let i=0;i<panes.length;i+=1) {
+  for (let i = 0; i < panes.length; i+=1) {
     const leftDividerDx = dxDiffs[i] ? dxDiffs[i] : 0;
     const rightDividerDx = dxDiffs[i-1] ? dxDiffs[i-1] : 0;
-    items.push({
-      ...panes[i],
-      width: panes[i].width + leftDividerDx - rightDividerDx,
-    });
-    if (i + 1 != panes.length) {
-      items[items.length - 1].width -= DIVIDER_WIDTH;
-      items.push(createDivider(i));
+
+    const isLast = i + 1 == panes.length;
+
+    // Push panes as Views
+    items.push(
+      <View
+        key={items.length}
+        style={{...panes[i].style, width: panes[i].width + leftDividerDx - rightDividerDx - (isLast ? 0 : DIVIDER_WIDTH)}}>
+      </View>
+    );
+
+    // Push divider if not at the end
+    if (!isLast) {
+      items.push(
+        <View
+          key={items.length}
+          style={{...styles.Divider, width: DIVIDER_WIDTH}}
+          onMouseEnter={setResizeCursor}
+          onMouseLeave={setDefaultCursor}
+          {...panResponders[i].panHandlers}>
+        </View>
+      );
     }
   }
 
   return (
-    <View style={{flex: 1, flexDirection: 'row',}}>
-      {items.map((item, i) => {
-        return (
-          <View
-            key={i}
-            style={{...item.style, width: item.width}}
-            onMouseEnter={item.onMouseEnter}
-            onMouseLeave={item.onMouseLeave}
-            {...(item.panHandlers ? item.panHandlers : {})}>
-          </View>
-        );
-      })}
+    <View style={{flex: 1, flexDirection: 'row'}}>
+      {items}
     </View>
   );
 };
